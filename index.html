@@ -245,26 +245,222 @@
             color: #666;
         }
         @media (max-width: 768px) {
-            .assessment-table {
+            body {
                 padding: 10px;
-            }
-            .assessment-table th, .assessment-table td {
-                padding: 6px 4px;
                 font-size: 14px;
             }
-            .assessment-table input[type="radio"] {
-                width: 16px;
-                height: 16px;
+            
+            .container {
+                padding: 15px;
+                margin: 0;
+                border-radius: 0;
             }
-        }
-        @media (max-width: 480px) {
-            .assessment-table th, .assessment-table td {
-                padding: 4px 2px;
+            
+            h1 {
+                font-size: 1.5em;
+                margin-bottom: 20px;
+            }
+            
+            h2 {
+                font-size: 1.3em;
+                margin-top: 20px;
+            }
+            
+            h3 {
+                font-size: 1.2em;
+                margin-top: 15px;
+            }
+            
+            .section {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .type-title {
+                font-size: 1.1em;
+                padding: 6px 10px;
+            }
+            
+            table {
+                font-size: 13px;
+            }
+            
+            th, td {
+                padding: 8px 6px;
+            }
+            
+            .option-group {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            label {
+                display: flex;
+                align-items: center;
+                margin-right: 0;
+                margin-bottom: 5px;
+            }
+            
+            .section-nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .section-nav button {
+                width: 100%;
+                margin: 0;
+            }
+            
+            .assessment-table {
+                padding: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .assessment-table table {
                 font-size: 12px;
             }
+            
+            .assessment-table th, 
+            .assessment-table td {
+                padding: 4px 2px;
+                text-align: center;
+            }
+            
             .assessment-table input[type="radio"] {
                 width: 14px;
                 height: 14px;
+            }
+            
+            .rating-scale {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            
+            .rating-scale div {
+                font-size: 11px;
+                flex: 1 1 30%;
+            }
+            
+            .rating-help {
+                font-size: 12px;
+                padding: 8px;
+            }
+            
+            .chart-container {
+                padding: 15px;
+                margin: 15px 0;
+            }
+            
+            .results-table {
+                font-size: 13px;
+            }
+            
+            .results-table th, 
+            .results-table td {
+                padding: 8px 4px;
+            }
+            
+            .holland-code {
+                padding: 12px;
+            }
+            
+            .career-recommendations ul {
+                columns: 1;
+                font-size: 13px;
+            }
+            
+            .save-dialog-content {
+                width: 95%;
+                padding: 20px 15px;
+            }
+            
+            .save-options {
+                flex-direction: column;
+            }
+            
+            .save-options button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            /* 添加移动端特定的滚动优化 */
+            .assessment-table {
+                -webkit-overflow-scrolling: touch;
+                overflow-x: auto;
+            }
+            
+            /* 优化按钮点击区域 */
+            button, 
+            input[type="radio"] {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            /* 优化表格在移动端的显示 */
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* 优化进度条显示 */
+            .progress-bar {
+                height: 15px;
+                margin-bottom: 15px;
+            }
+            
+            /* 优化导航按钮布局 */
+            .section-nav {
+                position: sticky;
+                bottom: 0;
+                background: white;
+                padding: 10px;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+                z-index: 100;
+            }
+        }
+        
+        /* 添加额外的超小屏幕优化 */
+        @media (max-width: 360px) {
+            body {
+                font-size: 13px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .section {
+                padding: 10px;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            .assessment-table table {
+                font-size: 11px;
+            }
+        }
+        
+        /* 添加横屏优化 */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .section {
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            .section-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                padding: 10px;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+                z-index: 100;
             }
         }
         .category-labels {
@@ -996,6 +1192,12 @@
             
             sectionDiv.appendChild(navButtons);
             form.appendChild(sectionDiv);
+            
+            // 平滑滚动到表单顶部
+            window.scrollTo({
+                top: form.offsetTop,
+                behavior: 'smooth'
+            });
         }
 
         function saveAnswer(section, type, index, value) {
@@ -1025,18 +1227,43 @@
         function validateAndNext(currentIndex) {
             // 保存当前部分的答案
             const section = sections[currentIndex];
+            const unansweredQuestions = [];
+            
+            // 检查每个类型的问题是否都已回答
             Object.keys(testData[section]).forEach(type => {
-                testData[section][type].forEach((_, index) => {
+                testData[section][type].forEach((question, index) => {
                     const radios = document.getElementsByName(`${type}_${index}`);
+                    let answered = false;
+                    
                     for (const radio of radios) {
                         if (radio.checked) {
+                            answered = true;
                             saveAnswer(section, type, index, radio.value);
+                            break;
+                        }
+                    }
+                    
+                    if (!answered) {
+                        // 对于自我评估部分，使用不同的格式
+                        if (section === 'selfAssessment') {
+                            const tableNumber = index < 6 ? 1 : 2;
+                            const tableIndex = index % 6;
+                            const typeKey = Object.keys(selfAssessmentData[`table${tableNumber}`])[tableIndex];
+                            unansweredQuestions.push(`自我评估表${tableNumber} - ${selfAssessmentData[`table${tableNumber}`][typeKey]}`);
+                        } else {
+                            unansweredQuestions.push(`${type}类${section === 'activities' ? '活动' : section === 'abilities' ? '能力' : '职业'} - 第${index + 1}题`);
                         }
                     }
                 });
             });
             
-            // 直接进入下一部分
+            // 如果有未回答的问题，显示提示
+            if (unansweredQuestions.length > 0) {
+                const message = `您还有以下${unansweredQuestions.length}个问题未回答：\n\n${unansweredQuestions.join('\n')}\n\n您可以选择继续完成这些问题，或者直接进入下一部分。`;
+                alert(message);
+            }
+            
+            // 无论是否完成所有问题，都允许进入下一部分
             loadSection(currentIndex + 1);
         }
 
@@ -1200,14 +1427,12 @@
                     }
                     
                     // 计算总分 - 活动、能力和职业部分的得分相加，再加上自我评估部分
-                    // 为保持分数平衡，将自我评估分数进行调整
                     
                     // 前三部分总分
                     const sectionsTotal = detailedScores[type].activities + detailedScores[type].abilities + detailedScores[type].careers;
                     
-                    // 自我评估总分 - 将1-7的量表转换为合适的分数贡献
-                    // 使用系数0.7来确保自我评估部分不会过度影响总分
-                    const selfAssessmentTotal = (detailedScores[type].selfAssessment1 + detailedScores[type].selfAssessment2) * 0.7;
+                    // 自我评估总分 - 直接相加，不使用系数
+                    const selfAssessmentTotal = detailedScores[type].selfAssessment1 + detailedScores[type].selfAssessment2;
                     
                     // 最终总分 
                     detailedScores[type].total = sectionsTotal + selfAssessmentTotal;
